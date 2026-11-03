@@ -1,6 +1,6 @@
 // Service worker del prototipo: deja la app abrir sin internet.
 // Si cambias index.html, sube el número de CACHE_NAME para que los celulares bajen la versión nueva.
-const CACHE_NAME = 'mis-finanzas-proto-v1';
+const CACHE_NAME = 'mis-finanzas-proto-v2';
 const ASSETS = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (e) => {

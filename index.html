@@ -94,6 +94,20 @@ select,input[type=text]{width:100%;background:var(--card);color:var(--text);bord
 .bar i{display:block;height:100%;background:var(--accent)}
 .bar i.warn{background:var(--yellow)}
 .view{display:none}.view.on{display:block}
+.lock{position:absolute;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:12px;text-align:center}
+.lock.off{display:none}
+.lock h1{font-size:26px}.lock p{color:var(--muted);font-size:14px}
+.dots{display:flex;gap:14px;margin:6px 0}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--muted)}.dots i.on{background:var(--accent);border-color:var(--accent)}
+.lock .keys{width:100%;max-width:320px;margin-top:6px}
+.lock .msg{min-height:20px;color:var(--yellow);font-size:13.5px}
+details{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:0 14px;margin-bottom:8px}
+details summary{padding:14px 0;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:10px}
+details summary::after{content:"+";color:var(--accent);font-size:20px;line-height:1}
+details[open] summary::after{content:"−"}
+details p{padding:0 0 14px;color:var(--muted);font-size:14.5px}
+textarea{width:100%;min-height:96px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:11px;font:inherit;resize:vertical}
+.scroll{flex:1;overflow-y:auto;margin-top:10px}
 </style>
 </head>
 <body>
@@ -104,7 +118,10 @@ select,input[type=text]{width:100%;background:var(--card);color:var(--text);bord
       <svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c9bff"/><stop offset="1" stop-color="#1f6feb"/></linearGradient></defs><path d="M32 4 56 14v18c0 14-10 24-24 28C18 56 8 46 8 32V14z" fill="url(#g)"/><path d="M20 38l8-8 6 6 11-13" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <div>Mis Finanzas<small>TSI</small></div>
     </div>
-    <button class="iconbtn" id="eye" aria-label="Ocultar cifras">👁</button>
+    <div style="display:flex;gap:8px">
+      <button class="iconbtn" id="ayudaBtn" aria-label="Ayuda" style="font-weight:800;font-size:18px">?</button>
+      <button class="iconbtn" id="eye" aria-label="Ocultar cifras">👁</button>
+    </div>
   </header>
   <main id="main">
     <section class="view on" id="v-inicio"></section>
@@ -132,6 +149,24 @@ select,input[type=text]{width:100%;background:var(--card);color:var(--text);bord
     <div class="keys" id="keys"></div>
     <button class="btn big" id="guardar"></button>
   </div>
+  <div class="sheet" id="ayuda">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <button class="iconbtn" id="cerrarAyuda" aria-label="Cerrar">✕</button>
+      <b id="ayudaTitulo" style="font-size:18px"></b><span style="width:42px"></span>
+    </div>
+    <div class="scroll" id="ayudaCuerpo"></div>
+  </div>
+  <div class="lock" id="lock">
+    <svg width="72" height="72" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4 56 14v18c0 14-10 24-24 28C18 56 8 46 8 32V14z" fill="url(#g)"/><path d="M20 38l8-8 6 6 11-13" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <h1>Mis Finanzas</h1>
+    <p id="lockSub"></p>
+    <button class="btn big" id="huella" style="max-width:320px"></button>
+    <p id="lockO"></p>
+    <div class="dots" id="pindots"></div>
+    <div class="msg" id="lockMsg" role="status"></div>
+    <div class="keys" id="lockKeys"></div>
+    <p id="lockDemo" style="font-size:12.5px"></p>
+  </div>
   <div class="toast" id="toast"><span id="toastmsg"></span><button id="toastbtn"></button></div>
 </div>
 
@@ -139,7 +174,7 @@ select,input[type=text]{width:100%;background:var(--card);color:var(--text);bord
 "use strict";
 /* ===== Textos en dos idiomas (en la app real vivirán en archivos de idioma) ===== */
 const T = {
- es:{banner:"PROTOTIPO · datos inventados · nada se guarda",nav_inicio:"Inicio",nav_movs:"Movimientos",nav_pagos:"Pagos",nav_mas:"Más",
+ es:{banner:"PROTOTIPO · datos inventados · lo que registres no se guarda",nav_inicio:"Inicio",nav_movs:"Movimientos",nav_pagos:"Pagos",nav_mas:"Más",
   verde:"Vas bien",amarillo:"Ojo",rojo:"En riesgo",
   sub_verde:"Todo en orden por ahora",sub_amarillo:"Hay algo que atender pronto",sub_rojo:"Necesitas actuar hoy",
   m_vencido:(n)=>`Tienes un pago vencido: ${n}`,m_prox:(n,d)=>`${n} vence ${d}`,m_pres:(c,p)=>`Llevas el ${p}% del presupuesto de ${c}`,m_gasto:"Este mes gastas más de lo que ingresa",m_ok:"Sin pagos vencidos y dentro del presupuesto",
@@ -150,10 +185,25 @@ const T = {
   guardado:"Guardado",deshacer:"Deshacer",anulado:"Movimiento anulado",anular:"Toca un movimiento para anularlo o recuperarlo",
   pagoMarcado:"Pago marcado como pagado",
   mas:{calendario:"Calendario",minuta:"Minuta",inventario:"Inventario",compras:"Compras",metas:"Metas de ahorro",presupuestos:"Presupuestos",reportes:"Reportes",ajustes:"Ajustes"},
-  porvenir:"Esta pantalla se diseña en la siguiente etapa",idioma:"Idioma",aviso:"Resumen del día a las",version:"Versión del prototipo 0.1",
+  porvenir:"Esta pantalla se diseña en la siguiente etapa",idioma:"Idioma",aviso:"Resumen del día a las",version:"Versión del prototipo 0.2",
   cats:{Comida:"Comida",Transporte:"Transporte",Servicios:"Servicios",Diversión:"Diversión",Salud:"Salud",Hogar:"Hogar",Ahorro:"Ahorro",Sueldo:"Sueldo",Otros:"Otros"},
-  mes:"Presupuesto del mes",ocultas:"Cifras ocultas",visibles:"Cifras visibles"},
- en:{banner:"PROTOTYPE · made-up data · nothing is saved",nav_inicio:"Home",nav_movs:"Activity",nav_pagos:"Bills",nav_mas:"More",
+  mes:"Presupuesto del mes",ocultas:"Cifras ocultas",visibles:"Cifras visibles",
+  lock_sub:"Desbloquea para entrar",lock_huella:"👆 Entrar con huella",lock_o:"o escribe tu PIN",lock_demo:"Demostración: el PIN de prueba es 1234",
+  lock_mal:"PIN incorrecto. Intenta de nuevo",lock_sinhuella:"No se pudo usar la huella aquí. Usa el PIN de prueba",
+  bloqueo:"Bloqueo con huella y PIN",bloquear:"Bloquear ahora",si:"Sí",no:"No",bloqueado_ok:"Bloqueo activado",bloqueado_off:"Bloqueo desactivado",
+  ayuda:"Ayuda",ayuda_sub:"Preguntas frecuentes y comentarios",
+  faq:[
+   ["¿Qué significa el semáforo?","Verde: vas bien. Amarillo: algo vence pronto o vas cerca del límite de un presupuesto. Rojo: tienes un pago vencido o gastas más de lo que ingresa. Debajo siempre te decimos el motivo."],
+   ["¿Cómo registro un gasto?","Toca el botón azul +, escribe el monto, toca una categoría y Guardar. Lo demás es opcional."],
+   ["Me equivoqué, ¿cómo lo corrijo?","En Movimientos toca el registro: queda tachado (anulado) pero no se borra. Vuelve a tocarlo para recuperarlo. Después registra el correcto."],
+   ["¿Para qué sirve el ojo?","Esconde las cifras por si alguien mira tu pantalla. Tócalo otra vez para verlas."],
+   ["¿Cómo me avisa de los pagos?","En la app real: un día antes de cada pago, cada día mientras esté vencido y un resumen a las 8 p. m. En este prototipo los avisos no se envían."],
+   ["¿Quién puede ver mis datos?","Solo tú. En la app real quedan en tu celular y se respaldan cifrados en tu propio Google Drive. Nosotros no los vemos."],
+   ["¿Qué pasa si pierdo el celular?","En la app real recuperas todo en uno nuevo con tu cuenta de Google y las respuestas de tus preguntas de seguridad. Si las olvidas, nadie puede recuperarlo; por eso hay que elegirlas bien."],
+   ["¿Qué es la pantalla de huella?","Es una demostración del bloqueo. En la app real entrarás con huella o PIN. Aquí el PIN de prueba es 1234."]
+  ],
+  com_t:"¿Algo no se entiende?",com_ph:"Escribe aquí lo que no entendiste o lo que cambiarías",com_btn:"Copiar mis comentarios",com_ok:"Copiado. Pégalo en un mensaje y envíalo a quien te dio la app",com_aviso:"No escribas datos personales ni cifras reales.",com_no:"Escribe algo primero"},
+ en:{banner:"PROTOTYPE · made-up data · what you enter is not saved",nav_inicio:"Home",nav_movs:"Activity",nav_pagos:"Bills",nav_mas:"More",
   verde:"You're doing well",amarillo:"Watch out",rojo:"At risk",
   sub_verde:"All in order for now",sub_amarillo:"Something needs attention soon",sub_rojo:"You need to act today",
   m_vencido:(n)=>`You have an overdue bill: ${n}`,m_prox:(n,d)=>`${n} is due ${d}`,m_pres:(c,p)=>`You've used ${p}% of your ${c} budget`,m_gasto:"This month you spend more than you earn",m_ok:"No overdue bills and within budget",
@@ -164,9 +214,24 @@ const T = {
   guardado:"Saved",deshacer:"Undo",anulado:"Entry voided",anular:"Tap an entry to void or restore it",
   pagoMarcado:"Bill marked as paid",
   mas:{calendario:"Calendar",minuta:"Daily log",inventario:"Inventory",compras:"Purchases",metas:"Savings goals",presupuestos:"Budgets",reportes:"Reports",ajustes:"Settings"},
-  porvenir:"This screen is designed in the next stage",idioma:"Language",aviso:"Daily summary at",version:"Prototype version 0.1",
+  porvenir:"This screen is designed in the next stage",idioma:"Language",aviso:"Daily summary at",version:"Prototype version 0.2",
   cats:{Comida:"Food",Transporte:"Transport",Servicios:"Utilities",Diversión:"Fun",Salud:"Health",Hogar:"Home",Ahorro:"Savings",Sueldo:"Salary",Otros:"Other"},
-  mes:"Monthly budget",ocultas:"Figures hidden",visibles:"Figures visible"}
+  mes:"Monthly budget",ocultas:"Figures hidden",visibles:"Figures visible",
+  lock_sub:"Unlock to continue",lock_huella:"👆 Use fingerprint",lock_o:"or type your PIN",lock_demo:"Demo: the test PIN is 1234",
+  lock_mal:"Wrong PIN. Try again",lock_sinhuella:"Fingerprint is not available here. Use the test PIN",
+  bloqueo:"Fingerprint and PIN lock",bloquear:"Lock now",si:"Yes",no:"No",bloqueado_ok:"Lock on",bloqueado_off:"Lock off",
+  ayuda:"Help",ayuda_sub:"FAQ and comments",
+  faq:[
+   ["What does the traffic light mean?","Green: you're doing well. Yellow: a bill is due soon or you're near a budget limit. Red: you have an overdue bill or spend more than you earn. We always show the reason below."],
+   ["How do I record an expense?","Tap the blue + button, type the amount, tap a category and Save. Everything else is optional."],
+   ["I made a mistake, how do I fix it?","In Activity, tap the entry: it is crossed out (voided) but never deleted. Tap again to restore it. Then record the right one."],
+   ["What is the eye for?","It hides the figures in case someone looks at your screen. Tap it again to show them."],
+   ["How will I be reminded of bills?","In the real app: one day before each bill, every day while overdue, and a summary at 8 p.m. In this prototype no reminders are sent."],
+   ["Who can see my data?","Only you. In the real app it stays on your phone and is backed up, encrypted, in your own Google Drive. We cannot see it."],
+   ["What if I lose my phone?","In the real app you recover everything on a new one with your Google account and the answers to your security questions. If you forget them, nobody can recover it, so choose them well."],
+   ["What is the fingerprint screen?","A demo of the lock. In the real app you will enter with fingerprint or PIN. Here the test PIN is 1234."]
+  ],
+  com_t:"Is something unclear?",com_ph:"Write here what you did not understand or what you would change",com_btn:"Copy my comments",com_ok:"Copied. Paste it into a message and send it to whoever gave you the app",com_aviso:"Do not write personal data or real figures.",com_no:"Write something first"}
 };
 let lang="es"; const t=()=>T[lang];
 
@@ -261,14 +326,16 @@ function rPagos(){
 function rMas(){
   const ic={calendario:"📅",minuta:"📓",inventario:"📦",compras:"🧾",metas:"🎯",presupuestos:"📊",reportes:"📈",ajustes:"⚙️"};
   $("#v-mas").innerHTML=`<h2>${t().nav_mas}</h2><div class="menu">${Object.keys(ic).filter(k=>k!=="ajustes").map(k=>`<button data-prox="1"><span>${ic[k]}</span><b>${t().mas[k]}</b></button>`).join("")}</div>
+  <div class="menu" style="margin-top:10px"><button data-ayuda="1" style="grid-column:1/-1;display:flex;align-items:center;gap:14px"><span style="margin:0">💬</span><div><b>${t().ayuda}</b><div style="color:var(--muted);font-size:13px">${t().ayuda_sub}</div></div></button></div>
   <h2>${t().mas.ajustes}</h2>
   <div class="card">
    <div class="row"><div class="tx"><b>${t().idioma}</b></div><div class="seg" style="width:150px"><button data-lang="es" class="${lang==="es"?"on":""}">ES</button><button data-lang="en" class="${lang==="en"?"on":""}">EN</button></div></div>
    <div class="row"><div class="tx"><b>${t().aviso}</b></div><b>8:00 p. m.</b></div>
-   <div class="row"><div class="tx"><b>🔒 PIN · 👆</b><small>5 min</small></div></div>
+   <div class="row"><div class="tx"><b>🔒 ${t().bloqueo}</b></div><div class="seg" style="width:130px"><button data-lockset="1" class="${lockOn?"on":""}">${t().si}</button><button data-lockset="0" class="${lockOn?"":"on"}">${t().no}</button></div></div>
+   <div class="row"><div class="tx"><b>${t().bloquear}</b></div><button class="btn" data-bloquear="1">🔒</button></div>
   </div><p style="color:var(--muted);font-size:12px;text-align:center;margin-top:16px">${t().version}</p>`;
 }
-function rTodo(){rInicio();rMovs();rPagos();rMas();document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t()[e.dataset.t]);$("#banner").textContent=t().banner;document.documentElement.lang=lang;renderSheetTexts()}
+function rTodo(){rInicio();rMovs();rPagos();rMas();document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t()[e.dataset.t]);$("#banner").textContent=t().banner;document.documentElement.lang=lang;renderSheetTexts();renderExtra()}
 
 /* ===== Navegación ===== */
 function ir(v){document.querySelectorAll(".view").forEach(e=>e.classList.toggle("on",e.id==="v-"+v));document.querySelectorAll("nav [data-v]").forEach(b=>b.classList.toggle("on",b.dataset.v===v));$("#main").scrollTop=0}
@@ -282,6 +349,9 @@ document.addEventListener("click",e=>{
   const tb=e.target.closest("[data-tab]");if(tb){tabPagos=tb.dataset.tab;rPagos();return}
   const lg=e.target.closest("[data-lang]");if(lg){lang=lg.dataset.lang;rTodo();return}
   if(e.target.closest("[data-prox]"))aviso(t().porvenir);
+  const ls=e.target.closest("[data-lockset]");if(ls){lockOn=ls.dataset.lockset==="1";rMas();aviso(lockOn?t().bloqueado_ok:t().bloqueado_off);return}
+  if(e.target.closest("[data-bloquear]")){bloquear();return}
+  if(e.target.closest("[data-ayuda]"))abrirAyuda();
 });
 
 /* ===== Registrar (menos de 10 segundos) ===== */
@@ -313,6 +383,54 @@ $("#guardar").addEventListener("click",()=>{
 /* ===== Aviso breve ===== */
 let tmr;
 function aviso(msg,btn,fn){$("#toastmsg").textContent=msg;const b=$("#toastbtn");b.style.display=btn?"":"none";b.textContent=btn||"";b.onclick=()=>{fn&&fn();$("#toast").classList.remove("show")};$("#toast").classList.add("show");clearTimeout(tmr);tmr=setTimeout(()=>$("#toast").classList.remove("show"),4000)}
+
+/* ===== Bloqueo con huella y PIN (demostración) ===== */
+const PIN_DEMO="1234"; let lockOn=true, pin="";
+const b64=(u)=>btoa(String.fromCharCode(...u)), deb64=(s)=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+function pintaLock(){$("#pindots").innerHTML=[0,1,2,3].map(i=>`<i class="${i<pin.length?"on":""}"></i>`).join("")}
+function msgLock(m){$("#lockMsg").textContent=m||""}
+function bloquear(){if(!lockOn){aviso(t().bloqueado_off);return}pin="";msgLock("");pintaLock();$("#lock").classList.remove("off")}
+function desbloquear(){pin="";msgLock("");$("#lock").classList.add("off")}
+$("#lockKeys").innerHTML=["1","2","3","4","5","6","7","8","9","","0","⌫"].map(k=>k?`<button data-lk="${k}">${k}</button>`:`<span></span>`).join("");
+$("#lockKeys").addEventListener("click",e=>{
+  const k=e.target.closest("[data-lk]");if(!k)return;const v=k.dataset.lk;msgLock("");
+  pin=v==="⌫"?pin.slice(0,-1):(pin+v).slice(0,4);pintaLock();
+  if(pin.length===4){ if(pin===PIN_DEMO){desbloquear()}else{$("#pindots").animate([{transform:"translateX(-8px)"},{transform:"translateX(8px)"},{transform:"none"}],{duration:220});pin="";setTimeout(pintaLock,220);msgLock(t().lock_mal)} }
+});
+// Huella real del celular (WebAuthn). Si no se puede, queda el PIN de prueba.
+async function huella(){
+  try{
+    if(!window.PublicKeyCredential||!(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()))throw new Error("sin huella");
+    const ch=crypto.getRandomValues(new Uint8Array(32)); let id=null;
+    try{id=localStorage.getItem("mf_cred")}catch(_){}
+    if(!id){
+      const c=await navigator.credentials.create({publicKey:{challenge:ch,rp:{name:"Mis Finanzas (prototipo)"},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:"demo",displayName:"Demo"},pubKeyCredParams:[{type:"public-key",alg:-7},{type:"public-key",alg:-257}],authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required"},timeout:60000}});
+      try{localStorage.setItem("mf_cred",b64(new Uint8Array(c.rawId)))}catch(_){}
+    }else{
+      await navigator.credentials.get({publicKey:{challenge:ch,allowCredentials:[{type:"public-key",id:deb64(id)}],userVerification:"required",timeout:60000}});
+    }
+    desbloquear();
+  }catch(_){msgLock(t().lock_sinhuella)}
+}
+$("#huella").addEventListener("click",huella);
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&lockOn)bloquear()});
+
+/* ===== Ayuda y comentarios ===== */
+function renderExtra(){
+  $("#lockSub").textContent=t().lock_sub;$("#huella").textContent=t().lock_huella;$("#lockO").textContent=t().lock_o;$("#lockDemo").textContent=t().lock_demo;pintaLock();
+  $("#ayudaTitulo").textContent=t().ayuda;
+  $("#ayudaCuerpo").innerHTML=t().faq.map(([q,a])=>`<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("")+
+   `<h2>${t().com_t}</h2><textarea id="comentarios" maxlength="800" placeholder="${esc(t().com_ph)}"></textarea><p style="color:var(--muted);font-size:12.5px;margin:6px 0">${t().com_aviso}</p><button class="btn big" id="copiarCom" style="margin-bottom:24px">${t().com_btn}</button>`;
+}
+function abrirAyuda(){$("#ayuda").classList.add("open")}
+$("#ayudaBtn").addEventListener("click",abrirAyuda);
+$("#cerrarAyuda").addEventListener("click",()=>$("#ayuda").classList.remove("open"));
+$("#ayudaCuerpo").addEventListener("click",async e=>{
+  if(!e.target.closest("#copiarCom"))return;
+  const ta=$("#comentarios"),txt=ta.value.trim();if(!txt){aviso(t().com_no);return}
+  try{await navigator.clipboard.writeText(txt)}catch(_){ta.select();document.execCommand("copy")}
+  aviso(t().com_ok);
+});
 
 rTodo();
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
