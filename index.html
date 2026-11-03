@@ -69,8 +69,8 @@ nav button{display:flex;flex-direction:column;align-items:center;gap:2px;font-si
 nav button svg{width:24px;height:24px}
 nav button.on{color:var(--accent)}
 nav .plus{width:58px;height:58px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;margin-top:-26px;box-shadow:0 8px 24px #2f81f766;border:4px solid var(--bg);min-width:0;padding:0}
-.sheet{position:absolute;inset:0;background:var(--bg);z-index:5;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s ease;padding:14px 18px 20px}
-.sheet.open{transform:none}
+.sheet{position:absolute;inset:0;background:var(--bg);z-index:5;display:flex;flex-direction:column;transform:translateY(100%);visibility:hidden;transition:transform .28s ease,visibility 0s .28s;padding:14px 18px 20px}
+.sheet.open{transform:none;visibility:visible;transition:transform .28s ease,visibility 0s}
 .monto{font-size:46px;font-weight:800;text-align:center;margin:10px 0 4px;font-variant-numeric:tabular-nums}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
 .chip{padding:10px 14px;border-radius:14px;background:var(--card);border:1px solid var(--border);font-size:14.5px}
@@ -121,6 +121,15 @@ pre.rep{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
 .licchip.rojo{background:#3a1517;border-color:var(--red)}
 .licchip b{color:var(--muted)}
 input[type=range]{width:100%;accent-color:var(--accent)}
+.cfgbtn{display:flex;align-items:center;gap:14px;width:100%;text-align:left;margin-top:16px;padding:16px;border-radius:16px;background:var(--card);border:1px solid var(--border)}
+.cfgbtn>span,.cfgrow>span{font-size:22px;flex:0 0 34px;text-align:center}
+.cfgbtn>div,.cfgrow>div{flex:1;min-width:0}
+.cfgbtn b,.cfgrow b{display:block;font-weight:600}
+.cfgbtn small,.cfgrow small{display:block;color:var(--muted);font-size:13px}
+.cfgbtn i,.cfgrow i{font-style:normal;color:var(--muted);font-size:22px}
+.cfgrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 0;border-bottom:1px solid var(--border)}
+.cfgrow:last-child{border-bottom:0}
+.atras{color:var(--accent);font-weight:700;padding:10px 0;font-size:16px}
 </style>
 </head>
 <body>
@@ -141,6 +150,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
     <section class="view" id="v-movs"></section>
     <section class="view" id="v-pagos"></section>
     <section class="view" id="v-mas"></section>
+    <section class="view" id="v-config"></section>
   </main>
   <nav id="nav">
     <button data-v="inicio" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span data-t="nav_inicio"></span></button>
@@ -219,7 +229,7 @@ const T = {
   guardado:"Guardado",deshacer:"Deshacer",anulado:"Movimiento anulado",anular:"Toca un movimiento para anularlo o recuperarlo",
   pagoMarcado:"Pago marcado como pagado",
   mas:{calendario:"Calendario",minuta:"Minuta",inventario:"Inventario",compras:"Compras",metas:"Metas de ahorro",presupuestos:"Presupuestos",reportes:"Reportes",ajustes:"Ajustes"},
-  porvenir:"Esta pantalla se diseña en la siguiente etapa",idioma:"Idioma",aviso:"Resumen del día a las",version:"Versión del prototipo 0.4",
+  porvenir:"Esta pantalla se diseña en la siguiente etapa",idioma:"Idioma",aviso:"Resumen del día a las",version:"Versión del prototipo 0.5",
   cats:{Comida:"Comida",Transporte:"Transporte",Servicios:"Servicios",Diversión:"Diversión",Salud:"Salud",Hogar:"Hogar",Ahorro:"Ahorro",Sueldo:"Sueldo",Otros:"Otros"},
   mes:"Presupuesto del mes",ocultas:"Cifras ocultas",visibles:"Cifras visibles",
   lock_sub:"Desbloquea para entrar",lock_huella:"👆 Entrar con huella",lock_o:"o escribe tu PIN",lock_demo:"Demostración: el PIN de prueba es 1234",
@@ -273,7 +283,8 @@ const T = {
   lic_codigo:"Activar con un código",lic_codigo_ph:"Pega aquí tu código",lic_activar_btn:"Activar",lic_ok:"Licencia activada",lic_mal:"Código no válido",
   lic_codigo_nota:"En la app real, TSI te envía el código como un enlace o un QR: lo tocas y se activa solo. Para esta demostración usa DEMO-LICENCIA.",
   lic_exportar:"Exportar mis datos",lic_exp_ok:"En la app real se guarda un archivo cifrado",
-  lic_demo_t:"Solo para la demostración",lic_demo_dia:(n)=>`Día de la prueba: ${n}`,lic_demo_reset:"Reiniciar demostración",lic_bloq:"Prueba terminada: solo lectura"},
+  lic_demo_t:"Solo para la demostración",lic_demo_dia:(n)=>`Día de la prueba: ${n}`,lic_demo_reset:"Reiniciar demostración",lic_bloq:"Prueba terminada: solo lectura",
+  cfg_titulo:"Configuración y ayuda",cfg_sub:"Licencia, seguridad, ajustes y soporte",cfg_cuenta:"Mi cuenta y seguridad",cfg_prefs:"Preferencias",cfg_ayuda:"Ayuda y soporte"},
  en:{banner:"PROTOTYPE · made-up data · what you enter is not saved",nav_inicio:"Home",nav_movs:"Activity",nav_pagos:"Bills",nav_mas:"More",
   verde:"You're doing well",amarillo:"Watch out",rojo:"At risk",
   sub_verde:"All in order for now",sub_amarillo:"Something needs attention soon",sub_rojo:"You need to act today",
@@ -285,7 +296,7 @@ const T = {
   guardado:"Saved",deshacer:"Undo",anulado:"Entry voided",anular:"Tap an entry to void or restore it",
   pagoMarcado:"Bill marked as paid",
   mas:{calendario:"Calendar",minuta:"Daily log",inventario:"Inventory",compras:"Purchases",metas:"Savings goals",presupuestos:"Budgets",reportes:"Reports",ajustes:"Settings"},
-  porvenir:"This screen is designed in the next stage",idioma:"Language",aviso:"Daily summary at",version:"Prototype version 0.4",
+  porvenir:"This screen is designed in the next stage",idioma:"Language",aviso:"Daily summary at",version:"Prototype version 0.5",
   cats:{Comida:"Food",Transporte:"Transport",Servicios:"Utilities",Diversión:"Fun",Salud:"Health",Hogar:"Home",Ahorro:"Savings",Sueldo:"Salary",Otros:"Other"},
   mes:"Monthly budget",ocultas:"Figures hidden",visibles:"Figures visible",
   lock_sub:"Unlock to continue",lock_huella:"👆 Use fingerprint",lock_o:"or type your PIN",lock_demo:"Demo: the test PIN is 1234",
@@ -339,7 +350,8 @@ const T = {
   lic_codigo:"Activate with a code",lic_codigo_ph:"Paste your code here",lic_activar_btn:"Activate",lic_ok:"License activated",lic_mal:"Invalid code",
   lic_codigo_nota:"In the real app, TSI sends you the code as a link or a QR: you tap it and it activates itself. For this demo use DEMO-LICENCIA.",
   lic_exportar:"Export my data",lic_exp_ok:"In the real app an encrypted file is saved",
-  lic_demo_t:"For the demo only",lic_demo_dia:(n)=>`Trial day: ${n}`,lic_demo_reset:"Reset demo",lic_bloq:"Trial ended: read-only"}
+  lic_demo_t:"For the demo only",lic_demo_dia:(n)=>`Trial day: ${n}`,lic_demo_reset:"Reset demo",lic_bloq:"Trial ended: read-only",
+  cfg_titulo:"Settings and help",cfg_sub:"License, security, preferences and support",cfg_cuenta:"My account and security",cfg_prefs:"Preferences",cfg_ayuda:"Help and support"}
 };
 let lang="es"; const t=()=>T[lang];
 
@@ -434,24 +446,29 @@ function rPagos(){
 function rMas(){
   const ic={calendario:"📅",minuta:"📓",inventario:"📦",compras:"🧾",metas:"🎯",presupuestos:"📊",reportes:"📈",ajustes:"⚙️"};
   $("#v-mas").innerHTML=`<h2>${t().nav_mas}</h2><div class="menu">${Object.keys(ic).filter(k=>k!=="ajustes").map(k=>`<button data-prox="1"><span>${ic[k]}</span><b>${t().mas[k]}</b></button>`).join("")}</div>
-  <div class="menu" style="margin-top:10px">
-   <button data-ayuda="1" style="grid-column:1/-1;display:flex;align-items:center;gap:14px"><span style="margin:0">💬</span><div><b>${t().ayuda}</b><div style="color:var(--muted);font-size:13px">${t().ayuda_sub}</div></div></button>
-   <button data-abrir="soporte" style="grid-column:1/-1;display:flex;align-items:center;gap:14px"><span style="margin:0">🛟</span><div><b>${t().sop_titulo}</b><div style="color:var(--muted);font-size:13px">${t().sop_sub}</div></div></button>
-   <button data-abrir="seguridad" style="grid-column:1/-1;display:flex;align-items:center;gap:14px"><span style="margin:0">🛡</span><div><b>${t().seg_titulo}</b><div style="color:var(--muted);font-size:13px">${t().seg_sub}</div></div></button>
-   <button data-abrir="licencia" style="grid-column:1/-1;display:flex;align-items:center;gap:14px"><span style="margin:0">🎁</span><div><b>${t().lic_titulo}</b><div style="color:var(--muted);font-size:13px">${t().lic_sub}</div></div></button>
-  </div>
-  <h2>${t().mas.ajustes}</h2>
+  <button class="cfgbtn" data-ir="config"><span>⚙️</span><div><b>${t().cfg_titulo}</b><small>${t().cfg_sub}</small></div><i>›</i></button>`;
+}
+function rConfig(){
+  const fila=(ic,ti,sub,attr)=>`<button class="cfgrow" ${attr}><span>${ic}</span><div><b>${ti}</b><small>${sub}</small></div><i>›</i></button>`;
+  $("#v-config").innerHTML=`<button class="atras" data-ir="mas">‹ ${t().nav_mas}</button>
+  <h2 style="margin-top:4px">${t().cfg_titulo}</h2>
+  <h2>${t().cfg_cuenta}</h2>
+  <div class="card" style="padding:0 14px">${fila("🎁",t().lic_titulo,t().lic_sub,'data-abrir="licencia"')}${fila("🛡",t().seg_titulo,t().seg_sub,'data-abrir="seguridad"')}</div>
+  <h2>${t().cfg_prefs}</h2>
   <div class="card">
    <div class="row"><div class="tx"><b>${t().idioma}</b></div><div class="seg" style="width:150px"><button data-lang="es" class="${lang==="es"?"on":""}">ES</button><button data-lang="en" class="${lang==="en"?"on":""}">EN</button></div></div>
    <div class="row"><div class="tx"><b>${t().aviso}</b></div><b>8:00 p. m.</b></div>
-   <div class="row"><div class="tx"><b>🔒 ${t().bloqueo}</b></div><div class="seg" style="width:130px"><button data-lockset="1" class="${lockOn?"on":""}">${t().si}</button><button data-lockset="0" class="${lockOn?"":"on"}">${t().no}</button></div></div>
+   <div class="row"><div class="tx"><b style="white-space:normal">🔒 ${t().bloqueo}</b></div><div class="seg" style="width:130px;flex:0 0 130px"><button data-lockset="1" class="${lockOn?"on":""}">${t().si}</button><button data-lockset="0" class="${lockOn?"":"on"}">${t().no}</button></div></div>
    <div class="row"><div class="tx"><b>${t().bloquear}</b></div><button class="btn" data-bloquear="1">🔒</button></div>
-  </div><p style="color:var(--muted);font-size:12px;text-align:center;margin-top:16px">${t().version}</p>`;
+  </div>
+  <h2>${t().cfg_ayuda}</h2>
+  <div class="card" style="padding:0 14px">${fila("💬",t().ayuda,t().ayuda_sub,'data-ayuda="1"')}${fila("🛟",t().sop_titulo,t().sop_sub,'data-abrir="soporte"')}</div>
+  <p style="color:var(--muted);font-size:12px;text-align:center;margin-top:16px">${t().version}</p>`;
 }
-function rTodo(){rInicio();rMovs();rPagos();rMas();document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t()[e.dataset.t]);$("#banner").textContent=t().banner;document.documentElement.lang=lang;renderSheetTexts();renderExtra()}
+function rTodo(){rInicio();rMovs();rPagos();rMas();rConfig();document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t()[e.dataset.t]);$("#banner").textContent=t().banner;document.documentElement.lang=lang;renderSheetTexts();renderExtra()}
 
 /* ===== Navegación ===== */
-function ir(v){document.querySelectorAll(".view").forEach(e=>e.classList.toggle("on",e.id==="v-"+v));document.querySelectorAll("nav [data-v]").forEach(b=>b.classList.toggle("on",b.dataset.v===v));$("#main").scrollTop=0}
+function ir(v){document.querySelectorAll(".view").forEach(e=>e.classList.toggle("on",e.id==="v-"+v));document.querySelectorAll("nav [data-v]").forEach(b=>b.classList.toggle("on",b.dataset.v===(v==="config"?"mas":v)));$("#main").scrollTop=0}
 $("#nav").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(b)ir(b.dataset.v)});
 $("#eye").addEventListener("click",()=>{hide=!hide;$("#app").classList.toggle("hide",hide);aviso(hide?t().ocultas:t().visibles)});
 document.addEventListener("click",e=>{
@@ -462,9 +479,10 @@ document.addEventListener("click",e=>{
   const tb=e.target.closest("[data-tab]");if(tb){tabPagos=tb.dataset.tab;rPagos();return}
   const lg=e.target.closest("[data-lang]");if(lg){lang=lg.dataset.lang;rTodo();return}
   if(e.target.closest("[data-prox]"))aviso(t().porvenir);
-  const ls=e.target.closest("[data-lockset]");if(ls){lockOn=ls.dataset.lockset==="1";rMas();aviso(lockOn?t().bloqueado_ok:t().bloqueado_off);return}
+  const ls=e.target.closest("[data-lockset]");if(ls){lockOn=ls.dataset.lockset==="1";rConfig();aviso(lockOn?t().bloqueado_ok:t().bloqueado_off);return}
   if(e.target.closest("[data-bloquear]")){bloquear();return}
   if(e.target.closest("[data-ayuda]"))abrirAyuda();
+  const nv=e.target.closest("[data-ir]");if(nv)ir(nv.dataset.ir);
 });
 
 /* ===== Registrar (menos de 10 segundos) ===== */
@@ -538,7 +556,7 @@ function renderExtra(){
    `<h2>${t().com_t}</h2><textarea id="comentarios" maxlength="800" placeholder="${esc(t().com_ph)}"></textarea><p style="color:var(--muted);font-size:12.5px;margin:6px 0">${t().com_aviso}</p><button class="btn big" id="copiarCom" style="margin-bottom:24px">${t().com_btn}</button>`;
 }
 /* ===== Soporte técnico TSI y seguridad ===== */
-const VERSION="0.4", SOPORTE_CORREO="tsi.techsecurity@gmail.com", SOPORTE_WA="573107567232";
+const VERSION="0.5", SOPORTE_CORREO="tsi.techsecurity@gmail.com", SOPORTE_WA="573107567232";
 function reporte(){
   const L=t(), d=$("#sopDonde"), q=$("#sopQue");
   const donde=d?L.sop_lugares[d.selectedIndex]:"", que=q?q.value.trim():"";
