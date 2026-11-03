@@ -108,6 +108,13 @@ details[open] summary::after{content:"−"}
 details p{padding:0 0 14px;color:var(--muted);font-size:14.5px}
 textarea{width:100%;min-height:96px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:11px;font:inherit;resize:vertical}
 .scroll{flex:1;overflow-y:auto;margin-top:10px}
+.chipst{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;margin-bottom:6px}
+.chipst.ya{background:#143a1f;color:#7fdc8f}.chipst.demo{background:#12294d;color:#8ab8ff}.chipst.real{background:#3d3010;color:#f0c35a}
+.seg-i{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px}
+.seg-i b{display:block;margin-bottom:3px}.seg-i p{color:var(--muted);font-size:14px}
+pre.rep{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px;font:12px/1.45 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-word;color:var(--muted);max-height:190px;overflow:auto}
+.contacto{display:flex;flex-direction:column;gap:4px;font-size:14.5px}
+.contacto a{color:var(--accent);text-decoration:none;font-weight:600}
 </style>
 </head>
 <body>
@@ -156,6 +163,20 @@ textarea{width:100%;min-height:96px;background:var(--card);color:var(--text);bor
     </div>
     <div class="scroll" id="ayudaCuerpo"></div>
   </div>
+  <div class="sheet" id="soporte">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <button class="iconbtn" data-cerrar="1" aria-label="Cerrar">✕</button>
+      <b id="sopTitulo" style="font-size:18px"></b><span style="width:42px"></span>
+    </div>
+    <div class="scroll" id="sopCuerpo"></div>
+  </div>
+  <div class="sheet" id="seguridad">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <button class="iconbtn" data-cerrar="1" aria-label="Cerrar">✕</button>
+      <b id="segTitulo" style="font-size:18px"></b><span style="width:42px"></span>
+    </div>
+    <div class="scroll" id="segCuerpo"></div>
+  </div>
   <div class="lock" id="lock">
     <svg width="72" height="72" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4 56 14v18c0 14-10 24-24 28C18 56 8 46 8 32V14z" fill="url(#g)"/><path d="M20 38l8-8 6 6 11-13" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <h1>Mis Finanzas</h1>
@@ -185,7 +206,7 @@ const T = {
   guardado:"Guardado",deshacer:"Deshacer",anulado:"Movimiento anulado",anular:"Toca un movimiento para anularlo o recuperarlo",
   pagoMarcado:"Pago marcado como pagado",
   mas:{calendario:"Calendario",minuta:"Minuta",inventario:"Inventario",compras:"Compras",metas:"Metas de ahorro",presupuestos:"Presupuestos",reportes:"Reportes",ajustes:"Ajustes"},
-  porvenir:"Esta pantalla se diseña en la siguiente etapa",idioma:"Idioma",aviso:"Resumen del día a las",version:"Versión del prototipo 0.2",
+  porvenir:"Esta pantalla se diseña en la siguiente etapa",idioma:"Idioma",aviso:"Resumen del día a las",version:"Versión del prototipo 0.3",
   cats:{Comida:"Comida",Transporte:"Transporte",Servicios:"Servicios",Diversión:"Diversión",Salud:"Salud",Hogar:"Hogar",Ahorro:"Ahorro",Sueldo:"Sueldo",Otros:"Otros"},
   mes:"Presupuesto del mes",ocultas:"Cifras ocultas",visibles:"Cifras visibles",
   lock_sub:"Desbloquea para entrar",lock_huella:"👆 Entrar con huella",lock_o:"o escribe tu PIN",lock_demo:"Demostración: el PIN de prueba es 1234",
@@ -202,7 +223,32 @@ const T = {
    ["¿Qué pasa si pierdo el celular?","En la app real recuperas todo en uno nuevo con tu cuenta de Google y las respuestas de tus preguntas de seguridad. Si las olvidas, nadie puede recuperarlo; por eso hay que elegirlas bien."],
    ["¿Qué es la pantalla de huella?","Es una demostración del bloqueo. En la app real entrarás con huella o PIN. Aquí el PIN de prueba es 1234."]
   ],
-  com_t:"¿Algo no se entiende?",com_ph:"Escribe aquí lo que no entendiste o lo que cambiarías",com_btn:"Copiar mis comentarios",com_ok:"Copiado. Pégalo en un mensaje y envíalo a quien te dio la app",com_aviso:"No escribas datos personales ni cifras reales.",com_no:"Escribe algo primero"},
+  com_t:"¿Algo no se entiende?",com_ph:"Escribe aquí lo que no entendiste o lo que cambiarías",com_btn:"Copiar mis comentarios",com_ok:"Copiado. Pégalo en un mensaje y envíalo a quien te dio la app",com_aviso:"No escribas datos personales ni cifras reales.",com_no:"Escribe algo primero",
+  sop_titulo:"Soporte técnico TSI",sop_sub:"Reporta una falla o pide ayuda",sop_contacto:"Contacto de soporte",sop_horario:"Atención: lunes a viernes, 8 a. m. a 4 p. m.",
+  sop_donde:"¿Dónde pasó?",sop_lugares:["Inicio","Registrar","Movimientos","Pagos","Más","Bloqueo o huella","Otro"],
+  sop_que:"¿Qué pasó?",sop_ph:"Cuenta qué hacías y qué viste. Sin cifras ni datos personales",
+  sop_prev:"Esto es lo que se enviará",sop_prev2:"Solo datos técnicos. Nunca tus movimientos, saldos ni datos personales.",
+  sop_mail:"✉ Enviar por correo",sop_wa:"💬 Enviar por WhatsApp",sop_copy:"Copiar reporte",sop_copiado:"Reporte copiado",
+  sop_nota:"Se abre tu correo o WhatsApp con el mensaje ya escrito. Tú decides si lo envías.",
+  rep_t:"Reporte de falla · Mis Finanzas (prototipo)",rep_ver:"Versión",rep_donde:"Dónde pasó",rep_que:"Qué pasó",rep_sin:"(sin describir)",rep_tec:"Datos técnicos (sin datos personales ni financieros)",rep_idioma:"Idioma",rep_inst:"Instalada como app",rep_net:"Internet",rep_pant:"Pantalla",rep_nav:"Navegador",rep_fecha:"Fecha",rep_si:"sí",rep_no:"no",
+  seg_titulo:"Cómo protegemos tus datos",seg_sub:"Qué ya existe y qué viene",
+  seg_intro:"Te decimos con claridad qué ya funciona en este prototipo y qué se construye en la app real. Nada de promesas vacías.",
+  seg_ya:"Ya en el prototipo",seg_demo:"Demostración",seg_real:"En la app real",
+  seg_items:[
+   ["ya","Tus datos son tuyos","Lo que ves aquí es inventado y no se envía a ningún lado. En la app real tus datos quedan en tu celular. No tenemos servidor propio ni los vemos."],
+   ["ya","Sin anuncios, rastreo ni analítica","La app no incluye publicidad, ni rastreadores, ni estadísticas de uso. Solo se conecta a internet para actualizarse."],
+   ["ya","Nada se borra, se anula","Un movimiento equivocado se anula (queda tachado) y se registra el correcto. El historial siempre cuadra."],
+   ["ya","Ocultar cifras","El ojo esconde tus saldos por si alguien mira tu pantalla."],
+   ["demo","Bloqueo con huella y PIN","Aquí es una demostración. En la app real se bloquea sola al salir o por inactividad, con intentos de PIN limitados y sin mostrar saldos en las apps recientes."],
+   ["real","Cifrado AES-256","Todo lo que sale de tu celular va cifrado con AES-256-GCM, con una clave derivada con PBKDF2 de 600.000 vueltas, como en TSI Vault."],
+   ["real","Respaldo en tu propio Google Drive","Una carpeta oculta de la app en tu Drive, con el permiso mínimo de Google. La app no ve el resto de tu Drive y nosotros tampoco."],
+   ["real","Recuperación con tus preguntas de seguridad","Tú escribes tus preguntas y respuestas. Con ellas recuperas todo en un celular nuevo. Si las olvidas, nadie puede recuperarlo: ni TSI ni Google."],
+   ["real","Avisos de pagos sin servidor","Los avisos los programa tu propio celular, aunque no tengas internet."],
+   ["real","Protección de datos personales (Ley 1581)","Política de privacidad y acuerdo de servicio revisados por un abogado antes de la entrega."]
+  ],
+  seg_lim:"Lo que ninguna app puede prometer",
+  seg_lim_t:"Si alguien usa tu celular ya desbloqueado, verá tus datos. Si pierdes tus respuestas de seguridad no hay recuperación. Mantén tu celular actualizado y con bloqueo de pantalla.",
+  ayu_atajos:"Más ayuda"},
  en:{banner:"PROTOTYPE · made-up data · what you enter is not saved",nav_inicio:"Home",nav_movs:"Activity",nav_pagos:"Bills",nav_mas:"More",
   verde:"You're doing well",amarillo:"Watch out",rojo:"At risk",
   sub_verde:"All in order for now",sub_amarillo:"Something needs attention soon",sub_rojo:"You need to act today",
@@ -214,7 +260,7 @@ const T = {
   guardado:"Saved",deshacer:"Undo",anulado:"Entry voided",anular:"Tap an entry to void or restore it",
   pagoMarcado:"Bill marked as paid",
   mas:{calendario:"Calendar",minuta:"Daily log",inventario:"Inventory",compras:"Purchases",metas:"Savings goals",presupuestos:"Budgets",reportes:"Reports",ajustes:"Settings"},
-  porvenir:"This screen is designed in the next stage",idioma:"Language",aviso:"Daily summary at",version:"Prototype version 0.2",
+  porvenir:"This screen is designed in the next stage",idioma:"Language",aviso:"Daily summary at",version:"Prototype version 0.3",
   cats:{Comida:"Food",Transporte:"Transport",Servicios:"Utilities",Diversión:"Fun",Salud:"Health",Hogar:"Home",Ahorro:"Savings",Sueldo:"Salary",Otros:"Other"},
   mes:"Monthly budget",ocultas:"Figures hidden",visibles:"Figures visible",
   lock_sub:"Unlock to continue",lock_huella:"👆 Use fingerprint",lock_o:"or type your PIN",lock_demo:"Demo: the test PIN is 1234",
@@ -231,7 +277,32 @@ const T = {
    ["What if I lose my phone?","In the real app you recover everything on a new one with your Google account and the answers to your security questions. If you forget them, nobody can recover it, so choose them well."],
    ["What is the fingerprint screen?","A demo of the lock. In the real app you will enter with fingerprint or PIN. Here the test PIN is 1234."]
   ],
-  com_t:"Is something unclear?",com_ph:"Write here what you did not understand or what you would change",com_btn:"Copy my comments",com_ok:"Copied. Paste it into a message and send it to whoever gave you the app",com_aviso:"Do not write personal data or real figures.",com_no:"Write something first"}
+  com_t:"Is something unclear?",com_ph:"Write here what you did not understand or what you would change",com_btn:"Copy my comments",com_ok:"Copied. Paste it into a message and send it to whoever gave you the app",com_aviso:"Do not write personal data or real figures.",com_no:"Write something first",
+  sop_titulo:"TSI technical support",sop_sub:"Report a problem or ask for help",sop_contacto:"Support contact",sop_horario:"Hours: Monday to Friday, 8 a.m. to 4 p.m. (Colombia)",
+  sop_donde:"Where did it happen?",sop_lugares:["Home","Record","Activity","Bills","More","Lock or fingerprint","Other"],
+  sop_que:"What happened?",sop_ph:"Tell us what you were doing and what you saw. No figures or personal data",
+  sop_prev:"This is what will be sent",sop_prev2:"Technical data only. Never your entries, balances or personal data.",
+  sop_mail:"✉ Send by email",sop_wa:"💬 Send by WhatsApp",sop_copy:"Copy report",sop_copiado:"Report copied",
+  sop_nota:"Your email or WhatsApp opens with the message already written. You decide whether to send it.",
+  rep_t:"Problem report · Mis Finanzas (prototype)",rep_ver:"Version",rep_donde:"Where it happened",rep_que:"What happened",rep_sin:"(not described)",rep_tec:"Technical data (no personal or financial data)",rep_idioma:"Language",rep_inst:"Installed as app",rep_net:"Internet",rep_pant:"Screen",rep_nav:"Browser",rep_fecha:"Date",rep_si:"yes",rep_no:"no",
+  seg_titulo:"How we protect your data",seg_sub:"What exists today and what is coming",
+  seg_intro:"We tell you clearly what already works in this prototype and what is built in the real app. No empty promises.",
+  seg_ya:"Already in the prototype",seg_demo:"Demo",seg_real:"In the real app",
+  seg_items:[
+   ["ya","Your data is yours","What you see here is made up and is not sent anywhere. In the real app your data stays on your phone. We have no server and cannot see it."],
+   ["ya","No ads, tracking or analytics","The app has no advertising, trackers or usage statistics. It only goes online to update itself."],
+   ["ya","Nothing is deleted, it is voided","A wrong entry is voided (crossed out) and the right one is recorded. The history always adds up."],
+   ["ya","Hide figures","The eye hides your balances in case someone looks at your screen."],
+   ["demo","Fingerprint and PIN lock","Here it is a demo. In the real app it locks itself when you leave or after inactivity, with limited PIN attempts and no balances in recent apps."],
+   ["real","AES-256 encryption","Everything that leaves your phone is encrypted with AES-256-GCM, using a key derived with PBKDF2 at 600,000 rounds, as in TSI Vault."],
+   ["real","Backup in your own Google Drive","A hidden app folder in your Drive, with Google's minimum permission. The app cannot see the rest of your Drive, and neither can we."],
+   ["real","Recovery with your security questions","You write your own questions and answers. With them you recover everything on a new phone. If you forget them, nobody can recover it: not TSI, not Google."],
+   ["real","Bill reminders without a server","Your own phone schedules the reminders, even without internet."],
+   ["real","Personal data protection (Law 1581, Colombia)","Privacy policy and service agreement reviewed by a lawyer before delivery."]
+  ],
+  seg_lim:"What no app can promise",
+  seg_lim_t:"If someone uses your phone while unlocked, they will see your data. If you lose your security answers there is no recovery. Keep your phone updated and with a screen lock.",
+  ayu_atajos:"More help"}
 };
 let lang="es"; const t=()=>T[lang];
 
@@ -326,7 +397,11 @@ function rPagos(){
 function rMas(){
   const ic={calendario:"📅",minuta:"📓",inventario:"📦",compras:"🧾",metas:"🎯",presupuestos:"📊",reportes:"📈",ajustes:"⚙️"};
   $("#v-mas").innerHTML=`<h2>${t().nav_mas}</h2><div class="menu">${Object.keys(ic).filter(k=>k!=="ajustes").map(k=>`<button data-prox="1"><span>${ic[k]}</span><b>${t().mas[k]}</b></button>`).join("")}</div>
-  <div class="menu" style="margin-top:10px"><button data-ayuda="1" style="grid-column:1/-1;display:flex;align-items:center;gap:14px"><span style="margin:0">💬</span><div><b>${t().ayuda}</b><div style="color:var(--muted);font-size:13px">${t().ayuda_sub}</div></div></button></div>
+  <div class="menu" style="margin-top:10px">
+   <button data-ayuda="1" style="grid-column:1/-1;display:flex;align-items:center;gap:14px"><span style="margin:0">💬</span><div><b>${t().ayuda}</b><div style="color:var(--muted);font-size:13px">${t().ayuda_sub}</div></div></button>
+   <button data-abrir="soporte" style="grid-column:1/-1;display:flex;align-items:center;gap:14px"><span style="margin:0">🛟</span><div><b>${t().sop_titulo}</b><div style="color:var(--muted);font-size:13px">${t().sop_sub}</div></div></button>
+   <button data-abrir="seguridad" style="grid-column:1/-1;display:flex;align-items:center;gap:14px"><span style="margin:0">🛡</span><div><b>${t().seg_titulo}</b><div style="color:var(--muted);font-size:13px">${t().seg_sub}</div></div></button>
+  </div>
   <h2>${t().mas.ajustes}</h2>
   <div class="card">
    <div class="row"><div class="tx"><b>${t().idioma}</b></div><div class="seg" style="width:150px"><button data-lang="es" class="${lang==="es"?"on":""}">ES</button><button data-lang="en" class="${lang==="en"?"on":""}">EN</button></div></div>
@@ -419,9 +494,55 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden&&lockOn)blo
 function renderExtra(){
   $("#lockSub").textContent=t().lock_sub;$("#huella").textContent=t().lock_huella;$("#lockO").textContent=t().lock_o;$("#lockDemo").textContent=t().lock_demo;pintaLock();
   $("#ayudaTitulo").textContent=t().ayuda;
+  renderSoporte();renderSeg();
   $("#ayudaCuerpo").innerHTML=t().faq.map(([q,a])=>`<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("")+
+   `<h2>${t().ayu_atajos}</h2><div class="menu"><button data-abrir="soporte"><span>🛟</span><b>${t().sop_titulo}</b></button><button data-abrir="seguridad"><span>🛡</span><b>${t().seg_titulo}</b></button></div>`+
    `<h2>${t().com_t}</h2><textarea id="comentarios" maxlength="800" placeholder="${esc(t().com_ph)}"></textarea><p style="color:var(--muted);font-size:12.5px;margin:6px 0">${t().com_aviso}</p><button class="btn big" id="copiarCom" style="margin-bottom:24px">${t().com_btn}</button>`;
 }
+/* ===== Soporte técnico TSI y seguridad ===== */
+const VERSION="0.3", SOPORTE_CORREO="tsi.techsecurity@gmail.com", SOPORTE_WA="573107567232";
+function reporte(){
+  const L=t(), d=$("#sopDonde"), q=$("#sopQue");
+  const donde=d?L.sop_lugares[d.selectedIndex]:"", que=q?q.value.trim():"";
+  const inst=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone;
+  return [L.rep_t,"",`${L.rep_ver}: ${VERSION}`,`${L.rep_donde}: ${donde}`,`${L.rep_que}: ${que||L.rep_sin}`,"",`${L.rep_tec}:`,
+   `- ${L.rep_idioma}: ${lang}`,`- ${L.rep_inst}: ${inst?L.rep_si:L.rep_no}`,`- ${L.rep_net}: ${navigator.onLine?L.rep_si:L.rep_no}`,
+   `- ${L.rep_pant}: ${innerWidth}x${innerHeight}`,`- ${L.rep_nav}: ${navigator.userAgent}`,`- ${L.rep_fecha}: ${new Date().toLocaleString(lang==="es"?"es-CO":"en-US")}`].join("\n");
+}
+function renderSoporte(){
+  const L=t(), d0=$("#sopDonde"), q0=$("#sopQue"), idx=d0?d0.selectedIndex:0, txt=q0?q0.value:"";
+  $("#sopTitulo").textContent=L.sop_titulo;
+  $("#sopCuerpo").innerHTML=`
+   <div class="card contacto"><b>${L.sop_contacto}</b><a href="mailto:${SOPORTE_CORREO}">${SOPORTE_CORREO}</a><a href="https://wa.me/${SOPORTE_WA}" target="_blank" rel="noopener">WhatsApp +57 310 756 7232</a><span style="color:var(--muted);font-size:13px">${L.sop_horario}</span></div>
+   <h2>${L.sop_donde}</h2><select id="sopDonde">${L.sop_lugares.map((x,i)=>`<option ${i===idx?"selected":""}>${esc(x)}</option>`).join("")}</select>
+   <h2>${L.sop_que}</h2><textarea id="sopQue" maxlength="600" placeholder="${esc(L.sop_ph)}">${esc(txt)}</textarea>
+   <h2>${L.sop_prev}</h2><pre class="rep" id="sopPrev"></pre><p style="color:var(--muted);font-size:12.5px;margin-top:6px">${L.sop_prev2}</p>
+   <button class="btn big" id="sopMail">${L.sop_mail}</button>
+   <button class="btn big ghost" id="sopWa">${L.sop_wa}</button>
+   <button class="btn big ghost" id="sopCopy">${L.sop_copy}</button>
+   <p style="color:var(--muted);font-size:12.5px;text-align:center;margin:10px 0 24px">${L.sop_nota}</p>`;
+  $("#sopPrev").textContent=reporte();
+}
+function renderSeg(){
+  const L=t(), nom={ya:L.seg_ya,demo:L.seg_demo,real:L.seg_real};
+  $("#segTitulo").textContent=L.seg_titulo;
+  $("#segCuerpo").innerHTML=`<p style="color:var(--muted);font-size:14px;margin:4px 0 12px">${esc(L.seg_intro)}</p>`+
+   L.seg_items.map(([c,ti,tx])=>`<div class="seg-i"><span class="chipst ${c}">${nom[c]}</span><b>${esc(ti)}</b><p>${esc(tx)}</p></div>`).join("")+
+   `<h2>${L.seg_lim}</h2><div class="seg-i"><p>${esc(L.seg_lim_t)}</p></div><div style="height:24px"></div>`;
+}
+function abrirHoja(id){$("#"+id).classList.add("open")}
+$("#sopCuerpo").addEventListener("input",e=>{if(e.target.id==="sopDonde"||e.target.id==="sopQue")$("#sopPrev").textContent=reporte()});
+$("#sopCuerpo").addEventListener("click",async e=>{
+  const b=e.target.closest("button");if(!b)return;
+  const rep=reporte(), asunto=`Mis Finanzas · reporte de falla (v${VERSION})`;
+  if(b.id==="sopMail"){const a=document.createElement("a");a.href=`mailto:${SOPORTE_CORREO}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(rep)}`;document.body.appendChild(a);a.click();a.remove()}
+  else if(b.id==="sopWa"){window.open(`https://wa.me/${SOPORTE_WA}?text=${encodeURIComponent(asunto+"\n\n"+rep)}`,"_blank","noopener")}
+  else if(b.id==="sopCopy"){try{await navigator.clipboard.writeText(rep)}catch(_){}aviso(t().sop_copiado)}
+});
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-abrir]");if(a){abrirHoja(a.dataset.abrir);return}
+  const c=e.target.closest("[data-cerrar]");if(c)c.closest(".sheet").classList.remove("open");
+});
 function abrirAyuda(){$("#ayuda").classList.add("open")}
 $("#ayudaBtn").addEventListener("click",abrirAyuda);
 $("#cerrarAyuda").addEventListener("click",()=>$("#ayuda").classList.remove("open"));
