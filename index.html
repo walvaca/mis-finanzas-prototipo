@@ -115,6 +115,12 @@ textarea{width:100%;min-height:96px;background:var(--card);color:var(--text);bor
 pre.rep{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px;font:12px/1.45 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-word;color:var(--muted);max-height:190px;overflow:auto}
 .contacto{display:flex;flex-direction:column;gap:4px;font-size:14.5px}
 .contacto a{color:var(--accent);text-decoration:none;font-weight:600}
+.licchip{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:11px 14px;margin:2px 0 12px;border-radius:14px;background:#12294d;border:1px solid #2a4a85;font-size:14px;font-weight:600}
+.licchip span:nth-child(2){flex:1}
+.licchip.amar{background:#33290f;border-color:var(--yellow)}
+.licchip.rojo{background:#3a1517;border-color:var(--red)}
+.licchip b{color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -177,6 +183,13 @@ pre.rep{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
     </div>
     <div class="scroll" id="segCuerpo"></div>
   </div>
+  <div class="sheet" id="licencia">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <button class="iconbtn" data-cerrar="1" aria-label="Cerrar">✕</button>
+      <b id="licTitulo" style="font-size:18px"></b><span style="width:42px"></span>
+    </div>
+    <div class="scroll" id="licCuerpo"></div>
+  </div>
   <div class="lock" id="lock">
     <svg width="72" height="72" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4 56 14v18c0 14-10 24-24 28C18 56 8 46 8 32V14z" fill="url(#g)"/><path d="M20 38l8-8 6 6 11-13" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <h1>Mis Finanzas</h1>
@@ -206,7 +219,7 @@ const T = {
   guardado:"Guardado",deshacer:"Deshacer",anulado:"Movimiento anulado",anular:"Toca un movimiento para anularlo o recuperarlo",
   pagoMarcado:"Pago marcado como pagado",
   mas:{calendario:"Calendario",minuta:"Minuta",inventario:"Inventario",compras:"Compras",metas:"Metas de ahorro",presupuestos:"Presupuestos",reportes:"Reportes",ajustes:"Ajustes"},
-  porvenir:"Esta pantalla se diseña en la siguiente etapa",idioma:"Idioma",aviso:"Resumen del día a las",version:"Versión del prototipo 0.3",
+  porvenir:"Esta pantalla se diseña en la siguiente etapa",idioma:"Idioma",aviso:"Resumen del día a las",version:"Versión del prototipo 0.4",
   cats:{Comida:"Comida",Transporte:"Transporte",Servicios:"Servicios",Diversión:"Diversión",Salud:"Salud",Hogar:"Hogar",Ahorro:"Ahorro",Sueldo:"Sueldo",Otros:"Otros"},
   mes:"Presupuesto del mes",ocultas:"Cifras ocultas",visibles:"Cifras visibles",
   lock_sub:"Desbloquea para entrar",lock_huella:"👆 Entrar con huella",lock_o:"o escribe tu PIN",lock_demo:"Demostración: el PIN de prueba es 1234",
@@ -248,7 +261,19 @@ const T = {
   ],
   seg_lim:"Lo que ninguna app puede prometer",
   seg_lim_t:"Si alguien usa tu celular ya desbloqueado, verá tus datos. Si pierdes tus respuestas de seguridad no hay recuperación. Mantén tu celular actualizado y con bloqueo de pantalla.",
-  ayu_atajos:"Más ayuda"},
+  ayu_atajos:"Más ayuda",
+  lic_titulo:"Licencia y prueba",lic_sub:"Tu plan y cuántos días te quedan",
+  lic_chip:(n)=>`Prueba gratis · te quedan ${n} días`,lic_chip_ultimo:"Prueba gratis · hoy es el último día",lic_chip_venc:"Prueba terminada · solo lectura",
+  lic_est_prueba:"Prueba gratis",lic_est_venc:"Prueba terminada",lic_est_lic:"Licencia activa",
+  lic_cliente:"Cliente",lic_cliente_v:"Cliente de demostración",lic_activada:"Activada el",lic_vence:"Vence el",lic_vence_h:"a las 11:59 p. m.",lic_plan:"Plan",lic_plan_prueba:"Prueba de 30 días",lic_plan_lic:"Licencia anual",
+  lic_dia:(n)=>`Día ${n} de 30`,
+  lic_expl_prueba:"Durante la prueba tienes todas las funciones. El día 30 es el último día completo.",
+  lic_expl_venc:"Modo solo lectura: puedes ver todo, exportar y respaldar tus datos, pero no registrar movimientos nuevos. Tus datos no se borran. Activa una licencia y todo vuelve a funcionar.",
+  lic_expl_lic:"Todas las funciones están activas.",
+  lic_codigo:"Activar con un código",lic_codigo_ph:"Pega aquí tu código",lic_activar_btn:"Activar",lic_ok:"Licencia activada",lic_mal:"Código no válido",
+  lic_codigo_nota:"En la app real, TSI te envía el código como un enlace o un QR: lo tocas y se activa solo. Para esta demostración usa DEMO-LICENCIA.",
+  lic_exportar:"Exportar mis datos",lic_exp_ok:"En la app real se guarda un archivo cifrado",
+  lic_demo_t:"Solo para la demostración",lic_demo_dia:(n)=>`Día de la prueba: ${n}`,lic_demo_reset:"Reiniciar demostración",lic_bloq:"Prueba terminada: solo lectura"},
  en:{banner:"PROTOTYPE · made-up data · what you enter is not saved",nav_inicio:"Home",nav_movs:"Activity",nav_pagos:"Bills",nav_mas:"More",
   verde:"You're doing well",amarillo:"Watch out",rojo:"At risk",
   sub_verde:"All in order for now",sub_amarillo:"Something needs attention soon",sub_rojo:"You need to act today",
@@ -260,7 +285,7 @@ const T = {
   guardado:"Saved",deshacer:"Undo",anulado:"Entry voided",anular:"Tap an entry to void or restore it",
   pagoMarcado:"Bill marked as paid",
   mas:{calendario:"Calendar",minuta:"Daily log",inventario:"Inventory",compras:"Purchases",metas:"Savings goals",presupuestos:"Budgets",reportes:"Reports",ajustes:"Settings"},
-  porvenir:"This screen is designed in the next stage",idioma:"Language",aviso:"Daily summary at",version:"Prototype version 0.3",
+  porvenir:"This screen is designed in the next stage",idioma:"Language",aviso:"Daily summary at",version:"Prototype version 0.4",
   cats:{Comida:"Food",Transporte:"Transport",Servicios:"Utilities",Diversión:"Fun",Salud:"Health",Hogar:"Home",Ahorro:"Savings",Sueldo:"Salary",Otros:"Other"},
   mes:"Monthly budget",ocultas:"Figures hidden",visibles:"Figures visible",
   lock_sub:"Unlock to continue",lock_huella:"👆 Use fingerprint",lock_o:"or type your PIN",lock_demo:"Demo: the test PIN is 1234",
@@ -302,7 +327,19 @@ const T = {
   ],
   seg_lim:"What no app can promise",
   seg_lim_t:"If someone uses your phone while unlocked, they will see your data. If you lose your security answers there is no recovery. Keep your phone updated and with a screen lock.",
-  ayu_atajos:"More help"}
+  ayu_atajos:"More help",
+  lic_titulo:"License and trial",lic_sub:"Your plan and how many days are left",
+  lic_chip:(n)=>`Free trial · ${n} days left`,lic_chip_ultimo:"Free trial · today is the last day",lic_chip_venc:"Trial ended · read-only",
+  lic_est_prueba:"Free trial",lic_est_venc:"Trial ended",lic_est_lic:"License active",
+  lic_cliente:"Customer",lic_cliente_v:"Demo customer",lic_activada:"Activated on",lic_vence:"Ends on",lic_vence_h:"at 11:59 p.m.",lic_plan:"Plan",lic_plan_prueba:"30-day trial",lic_plan_lic:"Annual license",
+  lic_dia:(n)=>`Day ${n} of 30`,
+  lic_expl_prueba:"During the trial you have every feature. Day 30 is the last full day.",
+  lic_expl_venc:"Read-only mode: you can see everything, export and back up your data, but not record new entries. Your data is not deleted. Activate a license and everything works again.",
+  lic_expl_lic:"All features are active.",
+  lic_codigo:"Activate with a code",lic_codigo_ph:"Paste your code here",lic_activar_btn:"Activate",lic_ok:"License activated",lic_mal:"Invalid code",
+  lic_codigo_nota:"In the real app, TSI sends you the code as a link or a QR: you tap it and it activates itself. For this demo use DEMO-LICENCIA.",
+  lic_exportar:"Export my data",lic_exp_ok:"In the real app an encrypted file is saved",
+  lic_demo_t:"For the demo only",lic_demo_dia:(n)=>`Trial day: ${n}`,lic_demo_reset:"Reset demo",lic_bloq:"Trial ended: read-only"}
 };
 let lang="es"; const t=()=>T[lang];
 
@@ -360,7 +397,7 @@ const COL={verde:"var(--green)",amarillo:"var(--yellow)",rojo:"var(--red)"}, SIM
 function rInicio(){
   const s=semaforo(), r=resumenHoy(), prox=pagos.filter(p=>!p.pagado).sort((a,b)=>a.f-b.f).slice(0,3);
   const gasComida=activos().filter(m=>m.tipo==="gasto"&&m.cat==="Comida").reduce((a,m)=>a+m.monto,0), pc=Math.min(100,Math.round(gasComida/PRESUPUESTO.Comida*100));
-  $("#v-inicio").innerHTML=`
+  $("#v-inicio").innerHTML=`${chipLic()}
   <div class="card semaforo ${s.nivel}"><div class="luz" aria-hidden="true">${SIM[s.nivel]}</div><div><h1>${t()[s.nivel]}</h1><p>${t()["sub_"+s.nivel]}</p></div></div>
   <div class="motivos">${s.motivos.map(m=>`<div class="motivo"><i class="dot" style="background:${COL[m.c]}"></i><span>${esc(m.x)}</span></div>`).join("")}</div>
   <h2>${t().hoy}</h2>
@@ -401,6 +438,7 @@ function rMas(){
    <button data-ayuda="1" style="grid-column:1/-1;display:flex;align-items:center;gap:14px"><span style="margin:0">💬</span><div><b>${t().ayuda}</b><div style="color:var(--muted);font-size:13px">${t().ayuda_sub}</div></div></button>
    <button data-abrir="soporte" style="grid-column:1/-1;display:flex;align-items:center;gap:14px"><span style="margin:0">🛟</span><div><b>${t().sop_titulo}</b><div style="color:var(--muted);font-size:13px">${t().sop_sub}</div></div></button>
    <button data-abrir="seguridad" style="grid-column:1/-1;display:flex;align-items:center;gap:14px"><span style="margin:0">🛡</span><div><b>${t().seg_titulo}</b><div style="color:var(--muted);font-size:13px">${t().seg_sub}</div></div></button>
+   <button data-abrir="licencia" style="grid-column:1/-1;display:flex;align-items:center;gap:14px"><span style="margin:0">🎁</span><div><b>${t().lic_titulo}</b><div style="color:var(--muted);font-size:13px">${t().lic_sub}</div></div></button>
   </div>
   <h2>${t().mas.ajustes}</h2>
   <div class="card">
@@ -418,9 +456,9 @@ $("#nav").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(b
 $("#eye").addEventListener("click",()=>{hide=!hide;$("#app").classList.toggle("hide",hide);aviso(hide?t().ocultas:t().visibles)});
 document.addEventListener("click",e=>{
   const p=e.target.closest("[data-pagar]");
-  if(p){const pg=pagos.find(x=>x.id==p.dataset.pagar);pg.pagado=true;movs.push({id:nextId++,tipo:"gasto",cat:"Servicios",monto:pg.monto,cuenta:"Banco",nota:pg.nombre,f:day(0),anulado:false});rTodo();aviso(t().pagoMarcado);return}
+  if(p){if(soloLectura()){bloqueoLic();return}const pg=pagos.find(x=>x.id==p.dataset.pagar);pg.pagado=true;movs.push({id:nextId++,tipo:"gasto",cat:"Servicios",monto:pg.monto,cuenta:"Banco",nota:pg.nombre,f:day(0),anulado:false});rTodo();aviso(t().pagoMarcado);return}
   const m=e.target.closest("[data-mov]");
-  if(m){const mv=movs.find(x=>x.id==m.dataset.mov);mv.anulado=!mv.anulado;rTodo();if(mv.anulado)aviso(t().anulado);return}
+  if(m){if(soloLectura()){bloqueoLic();return}const mv=movs.find(x=>x.id==m.dataset.mov);mv.anulado=!mv.anulado;rTodo();if(mv.anulado)aviso(t().anulado);return}
   const tb=e.target.closest("[data-tab]");if(tb){tabPagos=tb.dataset.tab;rPagos();return}
   const lg=e.target.closest("[data-lang]");if(lg){lang=lg.dataset.lang;rTodo();return}
   if(e.target.closest("[data-prox]"))aviso(t().porvenir);
@@ -446,7 +484,7 @@ $("#sheet").addEventListener("click",e=>{
   const c=e.target.closest("[data-cat]");if(c){reg.cat=c.dataset.cat;renderSheetTexts();return}
   const ti=e.target.closest("[data-tipo]");if(ti){reg.tipo=ti.dataset.tipo;renderSheetTexts()}
 });
-$("#plus").addEventListener("click",()=>{reg={tipo:"gasto",monto:"",cat:"Comida"};$("#nota").value="";renderSheetTexts();$("#sheet").classList.add("open")});
+$("#plus").addEventListener("click",()=>{if(soloLectura()){bloqueoLic();return}reg={tipo:"gasto",monto:"",cat:"Comida"};$("#nota").value="";renderSheetTexts();$("#sheet").classList.add("open")});
 $("#cerrar").addEventListener("click",()=>$("#sheet").classList.remove("open"));
 $("#guardar").addEventListener("click",()=>{
   if(!+reg.monto){$("#monto").animate([{transform:"translateX(-8px)"},{transform:"translateX(8px)"},{transform:"none"}],{duration:200});return}
@@ -494,13 +532,13 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden&&lockOn)blo
 function renderExtra(){
   $("#lockSub").textContent=t().lock_sub;$("#huella").textContent=t().lock_huella;$("#lockO").textContent=t().lock_o;$("#lockDemo").textContent=t().lock_demo;pintaLock();
   $("#ayudaTitulo").textContent=t().ayuda;
-  renderSoporte();renderSeg();
+  renderSoporte();renderSeg();renderLic();
   $("#ayudaCuerpo").innerHTML=t().faq.map(([q,a])=>`<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("")+
    `<h2>${t().ayu_atajos}</h2><div class="menu"><button data-abrir="soporte"><span>🛟</span><b>${t().sop_titulo}</b></button><button data-abrir="seguridad"><span>🛡</span><b>${t().seg_titulo}</b></button></div>`+
    `<h2>${t().com_t}</h2><textarea id="comentarios" maxlength="800" placeholder="${esc(t().com_ph)}"></textarea><p style="color:var(--muted);font-size:12.5px;margin:6px 0">${t().com_aviso}</p><button class="btn big" id="copiarCom" style="margin-bottom:24px">${t().com_btn}</button>`;
 }
 /* ===== Soporte técnico TSI y seguridad ===== */
-const VERSION="0.3", SOPORTE_CORREO="tsi.techsecurity@gmail.com", SOPORTE_WA="573107567232";
+const VERSION="0.4", SOPORTE_CORREO="tsi.techsecurity@gmail.com", SOPORTE_WA="573107567232";
 function reporte(){
   const L=t(), d=$("#sopDonde"), q=$("#sopQue");
   const donde=d?L.sop_lugares[d.selectedIndex]:"", que=q?q.value.trim():"";
@@ -531,6 +569,55 @@ function renderSeg(){
    `<h2>${L.seg_lim}</h2><div class="seg-i"><p>${esc(L.seg_lim_t)}</p></div><div style="height:24px"></div>`;
 }
 function abrirHoja(id){$("#"+id).classList.add("open")}
+
+/* ===== Licencia y periodo de prueba (simulado) =====
+   Regla: el día de activación es el día 1; el día 30 es el último y vence a las 11:59 p. m. (hora de Colombia).
+   Al vencer: solo lectura (ver, exportar y respaldar; no registrar). */
+const DIAS_PRUEBA=30; let simDia=1, licPlena=false;
+function estadoLic(){
+  if(licPlena)return {tipo:"licencia",solo:false};
+  const quedan=DIAS_PRUEBA-simDia+1; // cuenta el día de hoy
+  return quedan<=0?{tipo:"vencida",solo:true,quedan:0}:{tipo:"prueba",solo:false,quedan};
+}
+const soloLectura=()=>estadoLic().solo;
+const fechaLic=(off)=>day(off).toLocaleDateString(lang==="es"?"es-CO":"en-US",{day:"numeric",month:"long",year:"numeric"});
+function chipLic(){
+  const e=estadoLic(),L=t(); if(e.tipo==="licencia")return "";
+  const rojo=e.tipo==="vencida"||e.quedan===1, amar=e.quedan<=7;
+  const txt=e.tipo==="vencida"?L.lic_chip_venc:e.quedan===1?L.lic_chip_ultimo:L.lic_chip(e.quedan);
+  return `<button class="licchip ${rojo?"rojo":amar?"amar":""}" data-abrir="licencia"><span>${e.tipo==="vencida"?"🔒":"🎁"}</span><span>${txt}</span><b>›</b></button>`;
+}
+function licInfoHtml(){
+  const e=estadoLic(),L=t();
+  const est=e.tipo==="licencia"?L.lic_est_lic:e.tipo==="vencida"?L.lic_est_venc:L.lic_est_prueba;
+  const expl=e.tipo==="licencia"?L.lic_expl_lic:e.tipo==="vencida"?L.lic_expl_venc:L.lic_expl_prueba;
+  const col=e.tipo==="licencia"?"var(--green)":e.tipo==="vencida"?"var(--red)":e.quedan<=7?"var(--yellow)":"var(--accent)";
+  const usados=Math.min(DIAS_PRUEBA,simDia), act=-(simDia-1), fin=act+DIAS_PRUEBA-1;
+  const filas=e.tipo==="licencia"
+   ?`<div class="row"><div class="tx"><b>${L.lic_plan}</b></div><span>${L.lic_plan_lic}</span></div><div class="row"><div class="tx"><b>${L.lic_cliente}</b></div><span>${L.lic_cliente_v}</span></div>`
+   :`<div class="row"><div class="tx"><b>${L.lic_plan}</b></div><span>${L.lic_plan_prueba}</span></div><div class="row"><div class="tx"><b>${L.lic_cliente}</b></div><span>${L.lic_cliente_v}</span></div><div class="row"><div class="tx"><b>${L.lic_activada}</b></div><span>${fechaLic(act)}</span></div><div class="row"><div class="tx"><b>${L.lic_vence}</b></div><span style="text-align:right">${fechaLic(fin)}<br><small style="color:var(--muted)">${L.lic_vence_h}</small></span></div>`;
+  const barra=e.tipo==="licencia"?"":`<div class="bar"><i style="width:${Math.round(usados/DIAS_PRUEBA*100)}%;background:${col}"></i></div><small style="color:var(--muted)">${L.lic_dia(usados)}</small>`;
+  const exp=e.tipo==="vencida"?`<button class="btn big ghost" id="licExp">${L.lic_exportar}</button>`:"";
+  return `<div class="card" style="border-color:${col}"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:26px">${e.tipo==="vencida"?"🔒":e.tipo==="licencia"?"✅":"🎁"}</span><b style="font-size:20px">${est}</b></div>${barra}<p style="color:var(--muted);font-size:14px;margin-top:10px">${esc(expl)}</p></div><div class="card" style="margin-top:10px;padding:4px 16px">${filas}</div>${exp}`;
+}
+function renderLic(){
+  const L=t(); $("#licTitulo").textContent=L.lic_titulo;
+  $("#licCuerpo").innerHTML=`<div id="licInfo">${licInfoHtml()}</div>
+   <h2>${L.lic_codigo}</h2><input type="text" id="licCodigo" placeholder="${esc(L.lic_codigo_ph)}" autocomplete="off" autocapitalize="characters">
+   <button class="btn big" id="licActivar">${L.lic_activar_btn}</button>
+   <p style="color:var(--muted);font-size:12.5px;margin-top:8px">${esc(L.lic_codigo_nota)}</p>
+   <h2>${L.lic_demo_t}</h2><div class="card"><b id="licDiaTxt">${L.lic_demo_dia(simDia)}</b><input type="range" id="licSlider" min="1" max="32" value="${simDia}" style="margin-top:10px"><button class="btn ghost" id="licReset" style="margin-top:10px">${L.lic_demo_reset}</button></div><div style="height:24px"></div>`;
+}
+function actualizarLic(){$("#licInfo").innerHTML=licInfoHtml();$("#licDiaTxt").textContent=t().lic_demo_dia(simDia);rInicio()}
+function bloqueoLic(){aviso(t().lic_bloq,t().lic_titulo,()=>abrirHoja("licencia"))}
+$("#licCuerpo").addEventListener("input",e=>{if(e.target.id==="licSlider"){simDia=+e.target.value;actualizarLic()}});
+$("#licCuerpo").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.id==="licActivar"){
+    if($("#licCodigo").value.trim().toUpperCase()==="DEMO-LICENCIA"){licPlena=true;actualizarLic();aviso(t().lic_ok)}else{aviso(t().lic_mal)}
+  }else if(b.id==="licReset"){licPlena=false;simDia=1;renderLic();rInicio()}
+  else if(b.id==="licExp"){aviso(t().lic_exp_ok)}
+});
 $("#sopCuerpo").addEventListener("input",e=>{if(e.target.id==="sopDonde"||e.target.id==="sopQue")$("#sopPrev").textContent=reporte()});
 $("#sopCuerpo").addEventListener("click",async e=>{
   const b=e.target.closest("button");if(!b)return;
